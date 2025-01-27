@@ -1,5 +1,7 @@
 import { useUsers } from "./hooks/useUsers";
 import { User } from "./types";
+import { columns } from "./users/columns";
+import { DataTable } from "./users/data-table";
 
 function App() {
   const { data: users = [] as User[], isPending, error } = useUsers();
@@ -13,13 +15,8 @@ function App() {
   }
 
   return (
-    <div className="m-4">
-      {users.map((user) => (
-        <div key={user.id}>
-          <h2 className="font-semibold text-sky-700">{user.name}</h2>
-          <p className="mb-4 font-light text-sky-600">{user.email}</p>
-        </div>
-      ))}
+    <div className="p-12">
+      <DataTable columns={columns} data={users} />
     </div>
   );
 }

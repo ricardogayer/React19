@@ -284,14 +284,12 @@ Adicione .env no .gitignore:
 
 ### Criação de um hook para consumo de dados da API (para teste)
 
-Criar a pasta hooks
-
-Crie um tipo na nova pasta types no arquivo index.ts:
+Crie um arquivo index.ts na pasta types:
 
 Para criar o tipo correto, utilize o site [JSON to Typescript](https://transform.tools/json-to-typescript),
-copie a resposta da API no formato JSON e cole no site!
+basta copia e colar a resposta da API no formato JSON e o site gera o tipo correto!
 
-Altere root para o nome correto...
+Altere root para o nome correto... Neste exemplo é User!
 
 ```ts
 export interface User {
@@ -324,6 +322,8 @@ export interface Company {
   bs: string;
 }
 ```
+
+Hook useUsers.tsx criado na pasta hooks:
 
 ```ts
 import { User } from "@/types";
@@ -368,6 +368,169 @@ function App() {
           <p className="mb-4 font-light text-sky-600">{user.email}</p>
         </div>
       ))}
+    </div>
+  );
+}
+
+export default App;
+```
+
+## Criação de um Data Table (shadcn/ui) utilizando os dados do useUsers
+
+Instalação dos componentes necessários:
+
+```sh
+npx shadcn@latest add table
+npm install @tanstack/react-table
+```
+
+Crie uma pasta chamada users para colocarmos 3 arquivos:
+
+Crie um arquivo chamado columns.tsx para definição das colunas da tabela:
+
+```tsx
+import { User } from "@/types";
+import { ColumnDef } from "@tanstack/react-table";
+
+export const columns: ColumnDef<User>[] = [
+  {
+    accessorKey: "name",
+    header: "Nome",
+  },
+  {
+    accessorKey: "username",
+    header: "User Name",
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
+  },
+  {
+    accessorKey: "phone",
+    header: "Phone",
+  },
+  {
+    accessorKey: "website",
+    header: "Web Site",
+  },
+  {
+    accessorKey: "address.street",
+    header: "Street",
+  },
+  {
+    accessorKey: "address.city",
+    header: "City",
+  },
+];
+```
+
+Crie um arquivo chamado data-table.tsx para definição da tabela:
+
+```tsx
+"use client";
+
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+}
+
+export function DataTable<TData, TValue>({
+  columns,
+  data,
+}: DataTableProps<TData, TValue>) {
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                return (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No results.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+```
+
+Altere o arquivo App.tsx para renderizar a tabela:
+
+```tsx
+import { useUsers } from "./hooks/useUsers";
+import { User } from "./types";
+import { columns } from "./users/columns";
+import { DataTable } from "./users/data-table";
+
+function App() {
+  const { data: users = [] as User[], isPending, error } = useUsers();
+
+  if (isPending) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>{error.message}</p>;
+  }
+
+  return (
+    <div className="p-12">
+      <DataTable columns={columns} data={users} />
     </div>
   );
 }
