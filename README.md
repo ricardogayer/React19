@@ -146,18 +146,18 @@ export default {
 
 Para validação da configuração do Tailwind CSS, use o exemplo abaixo:
 
-````tsx
-    <>
-      <div className="m-4 text-gray-500">0123456789</div>
-      <div className="m-4 text-gray-500">1111111111</div>
-      <div className="m-4 text-gray-500">8888800025</div>
-      <div className="m-4 text-gray-500">3*9 12:34 3–8 +8+x</div>
-      <div className="m-4 font-medium text-gray-500">S@N s@n :-) •Smile</div>
-      <div className="m-4 font-light text-gray-500">Hello World</div>
-      <div className="m-4 text-sm text-gray-500">Hello World</div>
-      <div className="m-4 text-lg font-medium text-gray-500">Hello World</div>
-      <div className="m-4 text-xl font-light text-gray-500">Hello World</div>
-    </>
+```tsx
+<>
+  <div className="m-4 text-gray-500">0123456789</div>
+  <div className="m-4 text-gray-500">1111111111</div>
+  <div className="m-4 text-gray-500">8888800025</div>
+  <div className="m-4 text-gray-500">3*9 12:34 3–8 +8+x</div>
+  <div className="m-4 font-medium text-gray-500">S@N s@n :-) •Smile</div>
+  <div className="m-4 font-light text-gray-500">Hello World</div>
+  <div className="m-4 text-sm text-gray-500">Hello World</div>
+  <div className="m-4 text-lg font-medium text-gray-500">Hello World</div>
+  <div className="m-4 text-xl font-light text-gray-500">Hello World</div>
+</>
 ```
 
 ## Instalação do Shadcn/UI
@@ -171,7 +171,7 @@ No arquivo tsconfig.json adicionar as seguintes opções:
       "@/*": ["./src/*"]
     }
   }
-````
+```
 
 No arquivo tsconfig.app.json adicionar as seguintes opções:
 
