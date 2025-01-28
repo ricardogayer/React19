@@ -1,33 +1,10 @@
 import { Link } from "react-router";
-import { Helmet } from "react-helmet-async";
+import SEOHead from "@/utils/SEOHead";
 
 export default function App() {
   return (
     <>
-      <Helmet>
-        <title>React19 Template</title>
-        <meta
-          name="description"
-          content="Site React 19 template com vite e diversos componentes"
-        />
-        <meta
-          name="keywords"
-          content="react 19, vite, tailwindcss, shadcn/ui, inter font, tanstack query, react router v7"
-        />
-
-        {/* Tags para compartilhamento em redes sociais */}
-        <meta property="og:title" content="React19 Template" />
-        <meta
-          property="og:description"
-          content="Site React 19 template com vite e diversos componentes"
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://seusite.com" />
-
-        {/* URL canônica */}
-        <link rel="canonical" href="https://seusite.com" />
-      </Helmet>
-
+      <SEOHead />
       <div className="bg-white">
         <header className="absolute inset-x-0 top-0 z-50"></header>
 

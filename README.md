@@ -672,10 +672,11 @@ export const useUser = (id: number) => {
 };
 ```
 
-Instalação do Card do Shadcn/UI para mostrar o detalhe do usuário:
+Instalação do Card e Alert do Shadcn/UI para mostrar o detalhe do usuário e tratar parâmetro inválido.
 
 ```sh
 npx shadcn@latest add card
+npx shadcn@latest add alert
 ```
 
 Página para visualizar o detalhe do usuários.
@@ -691,16 +692,29 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useUser } from "@/hooks/useUser";
+import { validateParam } from "@/utils/validationParam";
 import { useParams } from "react-router";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const UserDetail = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
 
-  if (!id) {
-    return null;
+  const idValidation = validateParam(id, { min: 1 });
+
+  if (!idValidation.isValid) {
+    return (
+      <div className="w-1/2 p-8">
+        <Alert variant="destructive">
+          <AlertTitle>ID do usuário inválido</AlertTitle>
+          <AlertDescription>
+            {idValidation.error || "Parâmetro inválido"}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
-  const { data: user, isPending, error } = useUser(+id);
+  const { data: user, isPending, error } = useUser(idValidation.value!);
 
   if (isPending) {
     return <p>Loading...</p>;
@@ -733,6 +747,76 @@ const UserDetail = () => {
 export default UserDetail;
 ```
 
+Para validação do ID usuário, parâmetro passado pela URL, utilizamos uma função para validar se o parâmetro é numérico.
+Esta validação é importante para não quebrar a navegação...
+
+```ts
+// @/utils/validationParam.ts
+type ValidationResult<T> = {
+  isValid: boolean;
+  value: T | null;
+  error?: string;
+};
+
+export const validateParam = (
+  rawId: string | undefined,
+  options: {
+    min?: number;
+    max?: number;
+    allowZero?: boolean;
+  } = {},
+): ValidationResult<number> => {
+  const { min = 1, max = Number.MAX_SAFE_INTEGER, allowZero = false } = options;
+
+  if (!rawId) {
+    return {
+      isValid: false,
+      value: null,
+      error: "Um parâmetro numérico é obrigatório",
+    };
+  }
+
+  const parsedId = parseInt(rawId, 10);
+
+  if (isNaN(parsedId)) {
+    return {
+      isValid: false,
+      value: null,
+      error: "O parâmetro deve ser um número válido",
+    };
+  }
+
+  if (!allowZero && parsedId === 0) {
+    return {
+      isValid: false,
+      value: null,
+      error: "O parâmetro não pode ser zero",
+    };
+  }
+
+  if (parsedId < min) {
+    return {
+      isValid: false,
+      value: null,
+      error: `O parâmetro deve ser maior ou igual a ${min}`,
+    };
+  }
+
+  if (parsedId > max) {
+    return {
+      isValid: false,
+      value: null,
+      error: `O parâmetro deve ser menor ou igual a ${max}`,
+    };
+  }
+
+  return {
+    isValid: true,
+    value: parsedId,
+  };
+};
+```
+
 ## Implementação de SEO básico para 100% de Lighthouse
 
 ```sh
@@ -742,6 +826,7 @@ npm install react-helmet-async --legacy-peer-deps
 Configure o Helmet Provider no main.tsx:
 
 ```tsx
+// @/main.tsx
 import { lazy, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
@@ -775,34 +860,138 @@ createRoot(document.getElementById("root")!).render(
 );
 ```
 
-Na sua página de entrada adicione as tags Helmet antes do conteúdo principal, neste exemplo App.tsx:
+Criamos um componente chamado SEOHead reutilização do SEO em todas as páginas.
+Ele deve ser configurado com as mensagens padrão e ter suas propriedades sobreescritas em cada página.
 
 ```tsx
+// @/utils/SEOHead.tsx
+import { Helmet } from "react-helmet-async";
+
+interface SEOHeadProps {
+  title?: string;
+  description?: string;
+  image?: string;
+  url?: string;
+  type?: "website" | "article";
+  publishedTime?: string;
+  modifiedTime?: string;
+  author?: string;
+  keywords?: string[];
+}
+
+const SEOHead = ({
+  title = "React 19 Boilerplate",
+  description = "Boilerplate para projetos React 19",
+  image = "/og-image.jpg", // Imagem padrão
+  url = window.location.href,
+  type = "website",
+  publishedTime,
+  modifiedTime,
+  author = "Ricardo Ribeirto Gayer",
+  keywords = [
+    "react",
+    "boilerplate",
+    "typescript",
+    "tailwindcss",
+    "eslint",
+    "prettier",
+  ],
+}: SEOHeadProps) => {
+  const siteName = "React19 Boilerplate";
+  const twitterHandle = "@ricardogayer";
+
+  return (
+    <Helmet>
+      {/* Tags básicas */}
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta name="keywords" content={keywords.join(", ")} />
+      <link rel="canonical" href={url} />
+
+      {/* Open Graph / Facebook */}
+      <meta property="og:type" content={type} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:image" content={image} />
+      <meta property="og:url" content={url} />
+      <meta property="og:site_name" content={siteName} />
+
+      {/* Metadados adicionais para artigos */}
+      {type === "article" && publishedTime && (
+        <meta property="article:published_time" content={publishedTime} />
+      )}
+      {type === "article" && modifiedTime && (
+        <meta property="article:modified_time" content={modifiedTime} />
+      )}
+      {type === "article" && author && (
+        <meta property="article:author" content={author} />
+      )}
+
+      {/* Twitter */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content={twitterHandle} />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={image} />
+
+      {/* Favicons e ícones */}
+      <link
+        rel="icon"
+        type="image/png"
+        sizes="32x32"
+        href="/favicon-32x32.png"
+      />
+      <link
+        rel="icon"
+        type="image/png"
+        sizes="16x16"
+        href="/favicon-16x16.png"
+      />
+      <link
+        rel="apple-touch-icon"
+        sizes="180x180"
+        href="/apple-touch-icon.png"
+      />
+
+      {/* Metadados específicos para PWA */}
+      <meta name="application-name" content={siteName} />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+      <meta name="apple-mobile-web-app-title" content={siteName} />
+      <meta name="format-detection" content="telephone=no" />
+      <meta name="mobile-web-app-capable" content="yes" />
+      <meta name="theme-color" content="#004F92" />
+    </Helmet>
+  );
+};
+
+export default SEOHead;
+```
+
+```tsx
+// @/App.tsx
+import { Link } from "react-router";
+import SEOHead from "./utils/SEOHead";
+
+export default function App() {
+  return (
+    <>
+      <SEOHead />
+      <div className="bg-white">// Conteúdo</div>
+    </>
+  );
+}
+```
+
+Nas páginas internas os SEOs podem ser customizados!
+
+```tsx
+// @/users/UserDetails/tsx
 <>
-  <Helmet>
-    <title>React19 Template</title>
-    <meta
-      name="description"
-      content="Site React 19 template com vite e diversos componentes"
-    />
-    <meta
-      name="keywords"
-      content="react 19, vite, tailwindcss, shadcn/ui, inter font, tanstack query, react router v7"
-    />
-
-    {/* Tags para compartilhamento em redes sociais */}
-    <meta property="og:title" content="React19 Template" />
-    <meta
-      property="og:description"
-      content="Site React 19 template com vite e diversos componentes"
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://seusite.com" />
-
-    {/* URL canônica */}
-    <link rel="canonical" href="https://seusite.com" />
-  </Helmet>
-  <div> Seus componentes aqui! </div>
+  <>
+    <SEOHead title={`Usuário ${user.name}`} />
+    <div className="w-1/2 p-12"></div>
+  </>
 </>
 ```
 

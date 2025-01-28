@@ -1,5 +1,6 @@
-import { useUsers } from "../hooks/useUsers";
-import { User } from "../types";
+import SEOHead from "@/utils/SEOHead";
+import { useUsers } from "@/hooks/useUsers";
+import { User } from "@/types";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 
@@ -15,9 +16,12 @@ function UserList() {
   }
 
   return (
-    <div className="p-12">
-      <DataTable columns={columns} data={users} />
-    </div>
+    <>
+      <SEOHead title="Lista de Usuários" />
+      <div className="p-12">
+        <DataTable columns={columns} data={users} />
+      </div>
+    </>
   );
 }
 
