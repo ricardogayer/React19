@@ -1,5 +1,3 @@
-"use client";
-
 import {
   ColumnDef,
   flexRender,
@@ -32,7 +30,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border bg-white">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

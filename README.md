@@ -42,7 +42,7 @@ No arquivo index.css substituir todo o conteúdo por:
 No arquivo index.html adicionar o diretiva antialiased para deixar a renderização da font melhor:
 
 ```html
-<body class="antialiased">
+<body class="bg-gray-50 antialiased">
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
@@ -384,7 +384,8 @@ npx shadcn@latest add table
 npm install @tanstack/react-table
 ```
 
-Crie uma pasta chamada users para colocarmos 3 arquivos:
+Crie uma pasta chamada users para colocarmos 2 arquivos.
+Em projetos maiores, crie mais um arquivo para fazer a renderização da tabela.
 
 Crie um arquivo chamado columns.tsx para definição das colunas da tabela:
 
@@ -424,11 +425,10 @@ export const columns: ColumnDef<User>[] = [
 ];
 ```
 
-Crie um arquivo chamado data-table.tsx para definição da tabela:
+Crie um arquivo chamado data-table.tsx para definição da tabela.
+Alteração do background color para white (única customização)
 
 ```tsx
-"use client";
-
 import {
   ColumnDef,
   flexRender,
@@ -461,7 +461,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border bg-white">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -537,3 +537,306 @@ function App() {
 
 export default App;
 ```
+
+## Instação do React Router v7 (como Library)
+
+```sh
+npm install react-router
+```
+
+Definição das rotas em main.tsx:
+
+```tsx
+<BrowserRouter>
+  <Routes>
+    <Route path="/" element={<App />} />
+    <Route path="/users" element={<UserList />} />
+    <Route path="/users/:id" element={<UserDetail />} />
+  </Routes>
+</BrowserRouter>
+```
+
+Utilização de lazy load das páginas seguintes em main.tsx
+
+```tsx
+const UserList = lazy(() => import("./users/UserList.tsx"));
+const UserDetail = lazy(() => import("./users/UserDetail.tsx"));
+```
+
+Nova página App de entrada na aplicação:
+
+```tsx
+import { Link } from "react-router";
+
+export default function App() {
+  return (
+    <div className="bg-white">
+      <header className="absolute inset-x-0 top-0 z-50"></header>
+
+      <div className="relative isolate px-6 pt-14 lg:px-8">
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
+        >
+          <div
+            style={{
+              clipPath:
+                "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
+            }}
+            className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
+          />
+        </div>
+        <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
+          <div className="text-center">
+            <h1 className="text-balance text-5xl font-semibold tracking-tight text-gray-900 sm:text-7xl">
+              React 19 com Vite App Template
+            </h1>
+            <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-xl/8">
+              TailwindCSS, Shadcn/UI, Inter Font, Tanstack Query & React Router
+              v7
+            </p>
+            <div className="mt-10 flex items-center justify-center gap-x-6">
+              <Link
+                to="/users"
+                className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                Users
+              </Link>
+            </div>
+          </div>
+        </div>
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
+        >
+          <div
+            style={{
+              clipPath:
+                "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
+            }}
+            className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+Página UserList
+
+```tsx
+import { useUsers } from "../hooks/useUsers";
+import { User } from "../types";
+import { columns } from "./columns";
+import { DataTable } from "./data-table";
+
+function UserList() {
+  const { data: users = [] as User[], isPending, error } = useUsers();
+
+  if (isPending) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>{error.message}</p>;
+  }
+
+  return (
+    <div className="p-12">
+      <DataTable columns={columns} data={users} />
+    </div>
+  );
+}
+
+export default UserList;
+```
+
+Novo useUser hook para consulta de apenas um usuário:
+
+```ts
+import { User } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/api/apiClient";
+
+const getUser = async (id: number): Promise<User> => {
+  const response = await api.get<User>(`/users/${id}`);
+  return response.data;
+};
+
+export const useUser = (id: number) => {
+  return useQuery<User>({
+    queryKey: ["users", id],
+    queryFn: () => getUser(id),
+  });
+};
+```
+
+Instalação do Card do Shadcn/UI para mostrar o detalhe do usuário:
+
+```sh
+npx shadcn@latest add card
+```
+
+Página para visualizar o detalhe do usuários.
+Nesta página temos a recuperação do id do usuário através do useParams do React Router v7:
+
+```tsx
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useUser } from "@/hooks/useUser";
+import { useParams } from "react-router";
+
+const UserDetail = () => {
+  const { id } = useParams();
+
+  if (!id) {
+    return null;
+  }
+
+  const { data: user, isPending, error } = useUser(+id);
+
+  if (isPending) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>{error.message}</p>;
+  }
+
+  return (
+    <div className="w-1/2 p-12">
+      <Card>
+        <CardHeader>
+          <CardTitle>{user.name}</CardTitle>
+          <CardDescription>{user.username}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p>{user.email}</p>
+        </CardContent>
+        <CardFooter>
+          <p>
+            {user.address.street} - {user.address.city}
+          </p>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+};
+
+export default UserDetail;
+```
+
+## Implementação de SEO básico para 100% de Lighthouse
+
+```sh
+npm install react-helmet-async --legacy-peer-deps
+```
+
+Configure o Helmet Provider no main.tsx:
+
+```tsx
+import { lazy, StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { BrowserRouter, Route, Routes } from "react-router";
+import App from "./App.tsx";
+import { HelmetProvider } from "react-helmet-async";
+
+const UserList = lazy(() => import("./users/UserList.tsx"));
+const UserDetail = lazy(() => import("./users/UserDetail.tsx"));
+
+const queryClient = new QueryClient();
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/users" element={<UserList />} />
+            <Route path="/users/:id" element={<UserDetail />} />
+          </Routes>
+        </BrowserRouter>
+      </HelmetProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  </StrictMode>,
+);
+```
+
+Na sua página de entrada adicione as tags Helmet antes do conteúdo principal, neste exemplo App.tsx:
+
+```tsx
+<>
+  <Helmet>
+    <title>React19 Template</title>
+    <meta
+      name="description"
+      content="Site React 19 template com vite e diversos componentes"
+    />
+    <meta
+      name="keywords"
+      content="react 19, vite, tailwindcss, shadcn/ui, inter font, tanstack query, react router v7"
+    />
+
+    {/* Tags para compartilhamento em redes sociais */}
+    <meta property="og:title" content="React19 Template" />
+    <meta
+      property="og:description"
+      content="Site React 19 template com vite e diversos componentes"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://seusite.com" />
+
+    {/* URL canônica */}
+    <link rel="canonical" href="https://seusite.com" />
+  </Helmet>
+  <div> Seus componentes aqui! </div>
+</>
+```
+
+Crie o arquivo public\robots.txt com o conteúdo abaixo:
+
+```txt
+# https://www.robotstxt.org/robotstxt.html
+# Robots.txt file for React application
+
+# Allow all crawlers (default)
+User-agent: *
+Allow: /
+
+# Protect sensitive directories
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/
+
+# Development and build files
+Disallow: /node_modules/
+Disallow: /build/
+Disallow: /coverage/
+
+# Sitemap location
+Sitemap: https://www.seusite.com/sitemap.xml
+
+# Specific crawler settings
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+```
+
+Execute o Lighthouse no Google Chrome e SEO precisa dar 100%!

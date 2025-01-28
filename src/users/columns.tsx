@@ -1,10 +1,22 @@
 import { User } from "@/types";
 import { ColumnDef } from "@tanstack/react-table";
+import { Link } from "react-router";
 
 export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "name",
     header: "Nome",
+    cell: ({ row }) => {
+      const user = row.original;
+      return (
+        <Link
+          to={`/users/${user.id}`}
+          className="text-sky-700 hover:text-sky-500"
+        >
+          {user.name}
+        </Link>
+      );
+    },
   },
   {
     accessorKey: "username",

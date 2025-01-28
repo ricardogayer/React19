@@ -1,0 +1,28 @@
+# https://www.robotstxt.org/robotstxt.html
+# Robots.txt file for React application
+
+# Allow all crawlers (default)
+User-agent: *
+Allow: /
+
+# Protect sensitive directories
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/
+
+# Development and build files
+Disallow: /node_modules/
+Disallow: /build/
+Disallow: /coverage/
+
+# Sitemap location
+Sitemap: https://www.seusite.com/sitemap.xml
+
+# Specific crawler settings
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
