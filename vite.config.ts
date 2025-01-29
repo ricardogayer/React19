@@ -10,4 +10,27 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // CONFIGURAÇÃO DE PROXY
+  // preview: {
+  //   port: 5173,
+  //   proxy: {
+  //     "/api": {
+  //       target: "http://localhost:8000",
+  //       changeOrigin: true,
+  //       timeout: 50000,
+  //       rewrite: (path) => path.replace(/^\/api/, ""),
+  //     },
+  //   },
+  // },
+  // server: {
+  //   port: 5173,
+  //   proxy: {
+  //     "/api": {
+  //       target: "http://localhost:8000",
+  //       changeOrigin: true,
+  //       timeout: 50000,
+  //       rewrite: (path) => path.replace(/^\/api/, ""),
+  //     },
+  //   },
+  // },
 });

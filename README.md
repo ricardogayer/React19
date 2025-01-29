@@ -95,11 +95,32 @@ E adicione ao arquivo o conteúdo abaixo:
 
 ### Instalação da font Inter 4.0
 
-No arquivo index.html adicione as linhas abaixo no head:
+No arquivo index.html adicione as linhas abaixo no head para utilização on-line.
 
 ```html
 <link rel="preconnect" href="https://rsms.me/" />
 <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+```
+
+Para efetuar a utilização local, faça o donwload da font Inter em [Inter Download](https://rsms.me/inter/download/)
+Copie o conteúdo da pasta web para "/public/fonts/inter" do projeto React.
+
+```html
+<!-- <link rel="preconnect" href="https://rsms.me/" />
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css" /> -->
+<link rel="stylesheet" href="/fonts/inter/inter.css" />
+```
+
+Em produção, o NGINX deve ser configurado para "servir" as fontes:
+
+```json
+# Exemplo de configuração no servidor (nginx)
+location /fonts/ {
+    add_header Cache-Control "public, max-age=31536000";
+    add_header Access-Control-Allow-Origin "*";
+    gzip_static on;
+    gzip_types application/x-font-ttf application/x-font-opentype application/font-woff application/font-woff2;
+}
 ```
 
 No arquivo tailwind.config.js adicione a font Inter:
@@ -343,6 +364,87 @@ export const useUsers = () => {
 };
 ```
 
+## Componente Loading padronizado
+
+```tsx
+// @/utils/Loading.tsx
+import React from "react";
+
+interface LoadingProps extends React.HTMLAttributes<HTMLDivElement> {
+  size?: "sm" | "md" | "lg";
+  centered?: boolean;
+  ringColor?: string;
+  spinnerColor?: string;
+}
+
+const sizeMap = {
+  sm: "h-8 w-8",
+  md: "h-16 w-16",
+  lg: "h-24 w-24",
+};
+
+const joinClassNames = (...classes: (string | undefined)[]) => {
+  return classes.filter(Boolean).join(" ");
+};
+
+const Loading = React.forwardRef<HTMLDivElement, LoadingProps>(
+  (
+    {
+      size = "md",
+      centered = true,
+      className = "",
+      ringColor = "text-gray-200",
+      spinnerColor = "text-foreground",
+      ...props
+    },
+    ref,
+  ) => {
+    return (
+      <div
+        ref={ref}
+        role="status"
+        aria-label="Carregando"
+        className={joinClassNames(
+          "transition-all duration-200",
+          centered ? "flex items-center justify-center" : "",
+          className,
+        )}
+        {...props}
+      >
+        <div className={joinClassNames("animate-spin", sizeMap[size])}>
+          <svg
+            className="h-full w-full"
+            viewBox="0 0 94 94"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="47"
+              cy="47"
+              r="45"
+              className={ringColor}
+              strokeWidth="3"
+              stroke="currentColor"
+            />
+            <path
+              d="M92 46C92 22.5 71.5 2 48 2"
+              className={spinnerColor}
+              strokeWidth="3"
+              stroke="currentColor"
+            />
+          </svg>
+        </div>
+        <span className="sr-only">Carregando...</span>
+      </div>
+    );
+  },
+);
+
+Loading.displayName = "Loading";
+
+export default Loading;
+```
+
 ## Aplicação para testar o hook useUsers que incapsula o React Query
 
 ```tsx
@@ -353,7 +455,11 @@ function App() {
   const { data: users = [] as User[], isPending, error } = useUsers();
 
   if (isPending) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex h-full min-h-screen items-center justify-center">
+        <Loading ringColor="text-gray-300" spinnerColor="text-foreground" />
+      </div>
+    );
   }
 
   if (error) {
@@ -521,7 +627,11 @@ function App() {
   const { data: users = [] as User[], isPending, error } = useUsers();
 
   if (isPending) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex h-full min-h-screen items-center justify-center">
+        <Loading ringColor="text-gray-300" spinnerColor="text-foreground" />
+      </div>
+    );
   }
 
   if (error) {

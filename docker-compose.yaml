@@ -1,0 +1,17 @@
+services:
+  data4u_ui:
+    image: react19:latest
+    container_name: react19
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - VITE_API_BASE_URL=https://jsonplaceholder.typicode.com
+    ports:
+      - "8080:8080"
+    networks:
+      - home
+
+networks:
+  home:
+    driver: bridge

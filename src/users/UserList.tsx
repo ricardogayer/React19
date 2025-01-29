@@ -3,12 +3,17 @@ import { useUsers } from "@/hooks/useUsers";
 import { User } from "@/types";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
+import Loading from "@/utils/Loading";
 
 function UserList() {
   const { data: users = [] as User[], isPending, error } = useUsers();
 
   if (isPending) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex h-full min-h-screen items-center justify-center">
+        <Loading ringColor="text-gray-300" spinnerColor="text-foreground" />
+      </div>
+    );
   }
 
   if (error) {

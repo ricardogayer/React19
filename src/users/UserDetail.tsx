@@ -11,6 +11,7 @@ import { validateParam } from "@/utils/validationParam";
 import { useParams } from "react-router";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import SEOHead from "@/utils/SEOHead";
+import Loading from "@/utils/Loading";
 
 const UserDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,7 +34,11 @@ const UserDetail = () => {
   const { data: user, isPending, error } = useUser(idValidation.value!);
 
   if (isPending) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex h-full min-h-screen items-center justify-center">
+        <Loading ringColor="text-gray-300" spinnerColor="text-foreground" />
+      </div>
+    );
   }
 
   if (error) {
