@@ -5,7 +5,7 @@ import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import Loading from "@/utils/Loading";
 
-function UserList() {
+const UserList = () => {
   const { data: users = [] as User[], isPending, error } = useUsers();
 
   if (isPending) {
@@ -28,6 +28,6 @@ function UserList() {
       </div>
     </>
   );
-}
+};
 
 export default UserList;

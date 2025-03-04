@@ -2,6 +2,12 @@ import { Link } from "react-router";
 import SEOHead from "@/utils/SEOHead";
 
 export default function App() {
+  const preloadCart = () => {
+    // const UserList = import("@/users/UserList.tsx");
+    // Ou se o componente não for utilizado nesta página diretamente
+    import("@/users/UserList.tsx");
+  };
+
   return (
     <>
       <SEOHead />
@@ -33,6 +39,7 @@ export default function App() {
               <div className="mt-10 flex items-center justify-center gap-x-6">
                 <Link
                   to="/users"
+                  onMouseOver={preloadCart}
                   className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
                   Users

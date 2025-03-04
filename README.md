@@ -667,14 +667,61 @@ Definição das rotas em main.tsx:
 </BrowserRouter>
 ```
 
-Utilização de lazy load das páginas seguintes em main.tsx
+## Utilização de lazy load das páginas seguintes em main.tsx
+
+Nas rotas informe os componentes que serão carregados por demanda usando lazy(), exemplo abaixo:
 
 ```tsx
 const UserList = lazy(() => import("./users/UserList.tsx"));
 const UserDetail = lazy(() => import("./users/UserDetail.tsx"));
 ```
 
-Nova página App de entrada na aplicação:
+Na definição das rotas, utilize Suspense com um componente Fallback durante o carregamento dos componentes lazy()!
+
+```tsx
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <ErrorBoundary FallbackComponent={FallbackUI}>
+      <Suspense fallback={<Loading />}>
+        <QueryClientProvider client={queryClient}>
+          <HelmetProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<App />} />
+                <Route path="/users" element={<UserList />} />
+                <Route path="/users/:id" element={<UserDetail />} />
+              </Routes>
+            </BrowserRouter>
+          </HelmetProvider>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </Suspense>
+    </ErrorBoundary>
+  </StrictMode>,
+);
+```
+
+Podemos fazer um pré-carregamento através de eventos de mouse, por exemplo:
+
+```tsx
+...
+const preloadCart = () => {
+    const UserList = import("@/users/UserList.tsx");
+    // Ou se o componente não for utilizado nesta página diretamente
+    import("@/users/UserList.tsx");
+  };
+...
+<Link
+  to="/users"
+  onMouseOver={preloadCart}
+  className="..."
+>
+  Users
+</Link>
+...
+```
+
+## Novas páginas da aplicação exemplo
 
 ```tsx
 import { Link } from "react-router";
