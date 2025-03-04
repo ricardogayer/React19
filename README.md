@@ -227,6 +227,7 @@ Execute o shadcn-ui init:
 
 ```sh
 npx shadcn@latest init
+npx shadcn@latest add button
 ```
 
 Opções:
@@ -1139,3 +1140,69 @@ Crawl-delay: 1
 ```
 
 Execute o Lighthouse no Google Chrome e SEO precisa dar 100%!
+
+## Implementação de React Error Boundary
+
+```sh
+npm install react-error-boundary --legacy-peer-deps
+```
+
+Envolva as principais páginas com o ErrorBoundary e implementa a página de fallback (FallbackUI):
+
+```tsx
+...
+import { ErrorBoundary } from "react-error-boundary";
+import FallbackUI from "./error/FallbackUI";
+...
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <ErrorBoundary FallbackComponent={FallbackUI}>
+      <QueryClientProvider client={queryClient}>
+        <HelmetProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<App />} />
+              <Route path="/users" element={<UserList />} />
+              <Route path="/users/:id" element={<UserDetail />} />
+            </Routes>
+          </BrowserRouter>
+        </HelmetProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ErrorBoundary>
+  </StrictMode>,
+);
+```
+
+No componente FallbackUI, faça as limpeza necessárias para a sua aplicação:
+
+```tsx
+...
+const FallbackUI = ({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error;
+  resetErrorBoundary: () => void;
+}) => {
+  const [showDetails, setShowDetails] = useState(false);
+  const navigateToHome = () => (window.location.href = "/");
+
+  const handleResetApp = () => {
+    // Coloque aqui a limpeza de estado global, cache, etc.
+    resetErrorBoundary();
+  };
+
+  const handleResetErrorBoundary = () => {
+    handleResetApp();
+    setShowDetails(false);
+  };
+
+  const handleNavigateHome = () => {
+    handleResetApp();
+    navigateToHome();
+    setShowDetails(false);
+  };
+...
+```

@@ -8,13 +8,20 @@ import {
 } from "@/components/ui/card";
 import { useUser } from "@/hooks/useUser";
 import { validateParam } from "@/utils/validationParam";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import SEOHead from "@/utils/SEOHead";
 import Loading from "@/utils/Loading";
+import { Button } from "@/components/ui/button";
 
 const UserDetail = () => {
+  const navigate = useNavigate();
+
   const { id } = useParams<{ id: string }>();
+
+  if (id === "2") {
+    throw new Error("Ocorreu um erro na renderização do componente");
+  }
 
   const idValidation = validateParam(id, { min: 1 });
 
@@ -48,6 +55,7 @@ const UserDetail = () => {
   return (
     <>
       <SEOHead title={`Usuário ${user.name}`} />
+
       <div className="w-1/2 p-12">
         <Card>
           <CardHeader>
@@ -64,6 +72,13 @@ const UserDetail = () => {
           </CardFooter>
         </Card>
       </div>
+      <Button
+        className="ml-12"
+        variant={"outline"}
+        onClick={() => navigate(-1)}
+      >
+        Voltar
+      </Button>
     </>
   );
 };
